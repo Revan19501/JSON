@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>User Page</title>
+    <style>
+        .hidden-column {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <form class="text-white">
+            <strong id="userUsername">Username: </strong>
+            <span id="userRoles"></span>
+        </form>
+        <input type="button" class="btn btn-dark text-secondary" value="Logout"
+               onclick="window.location.href = '/logout'">
+    </div>
+</nav>
+
+<div class="container-fluid" style="padding-top: 20px">
+    <div class="row">
+        <div class="col">
+            <div class="row">
+                <button id="adminButton" class="btn btn-link btn-lg btn-block text-start" style="display: none;"
+                        onclick="window.location.href = '/admin'">
+                    Admin
+                </button>
+                <button class="btn btn-primary btn-lg btn-block text-start" onclick="window.location.href = '/user'">
+                    User
+                </button>
+            </div>
+        </div>
+
+        <div class="col-10 bg-light" style="padding-left: 20px">
+            <h1>User information-page</h1>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">About user</h3>
+                </div>
+
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th class="hidden-column">Id</th>
+                            <th>Username</th>
+                            <th>Name</th>
+                            <th>Last Name</th>
+                            <th>Age</th>
+                            <th>Roles</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td class="hidden-column" id="userId"></td>
+                            <td id="userUsernameTable"></td>
+                            <td id="userName"></td>
+                            <td id="userLastName"></td>
+                            <td id="userAge"></td>
+                            <td id="userRolesTable"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/user", {credentials: 'include'})
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch user data: " + response.status);
+                }
+                return response.json();
+            })
+            .then(user => {
+                document.getElementById("userId").textContent = user.id;
+                document.getElementById("userUsername").textContent = `Username: ${user.username}`;
+                document.getElementById("userUsernameTable").textContent = user.username;
+                document.getElementById("userName").textContent = user.name;
+                document.getElementById("userLastName").textContent = user.lastName;
+                document.getElementById("userAge").textContent = user.age;
+
+                const rolesText = user.authorities.map(role => role.authority.replace("ROLE_", "")).join(", ");
+                document.getElementById("userRoles").textContent = `with roles: ${rolesText}`;
+                document.getElementById("userRolesTable").textContent = rolesText;
+
+                if (user.authorities.some(role => role.authority === "ROLE_ADMIN")) {
+                    document.getElementById("adminButton").style.display = "block";
+                }
+            })
+            .catch(error => {
+                console.error("Error loading user data:", error);
+                document.getElementById("userUsername").textContent = "Username: Guest";
+                document.getElementById("userRoles").textContent = "";
+            });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+        crossorigin="anonymous"></script>
+</body>
+</html>

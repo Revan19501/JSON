@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <form class="text-white">
+            <strong id="usernameDisplay">Username: </strong>
+            <span id="rolesDisplay"></span>
+        </form>
+        <input type="button" class="btn btn-dark text-secondary" value="Logout" onclick="window.location.href = '/logout'">
+    </div>
+</nav>
+
+<div class="container-fluid" style="padding-top: 20px">
+    <div class="row">
+        <div class="col">
+            <div class="row">
+                <button id="adminButton" class="btn btn-primary btn-lg btn-block text-start">Admin</button>
+                <button id="userButton" class="btn btn-link btn-lg btn-block text-start">User</button>
+            </div>
+        </div>
+
+        <div class="container-fluid col-10 bg-light" style="padding-left: 20px">
+            <!-- Вкладка Admin -->
+            <div id="adminContent">
+                <h1>Admin panel</h1>
+
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <button class="nav-link active" id="usersTable-tab" data-bs-toggle="tab"
+                                data-bs-target="#usersTable" type="button" role="tab" aria-controls="usersTable"
+                                aria-selected="true">Users table</button>
+                        <button class="nav-link" id="newUser-tab" data-bs-toggle="tab" data-bs-target="#newUser"
+                                type="button" role="tab" aria-controls="newUser" aria-selected="false">New User</button>
+                    </div>
+                </nav>
+
+                <div class="tab-content">
+                    <!-- Users Table -->
+                    <div class="tab-pane fade show active" id="usersTable" role="tabpanel" aria-labelledby="usersTable-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">All users</h3>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-striped" id="usersTable">
+                                    <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Username</th>
+                                        <th>Name</th>
+                                        <th>Last Name</th>
+                                        <th>Age</th>
+                                        <th>Roles</th>
+                                        <th>Edit</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New User -->
+                    <div class="tab-pane fade" id="newUser" role="tabpanel" aria-labelledby="newUser-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Add new user</h3>
+                            </div>
+                            <div class="card-body col-4 mx-auto text-center">
+                                <form id="newUserForm">
+                                    <div class="form-group">
+                                        <label for="newName"><b>Name</b></label>
+                                        <input type="text" class="form-control" id="newName" required>
+                                    </div>
+                                    <br>
+                                    <div class="form-group">
+                                        <label for="newLastName"><b>Last Name</b></label>
+                                        <input type="text" class="form-control" id="newLastName" required>
+                                    </div>
+                                    <br>
+                                    <div class="form-group">
+                                        <label for="newAge"><b>Age</b></label>
+                                        <input type="number" class="form-control" id="newAge" required>
+                                    </div>
+                                    <br>
+                                    <div class="form-group">
+                                        <label for="newUsername"><b>Username</b></label>
+                                        <input type="text" class="form-control" id="newUsername" required>
+                                    </div>
+                                    <br>
+                                    <div class="form-group">
+                                        <label for="newPassword"><b>Password</b></label>
+                                        <input type="password" class="form-control" id="newPassword" required>
+                                    </div>
+                                    <br>
+                                    <div class="form-group">
+                                        <label><b>Roles</b></label>
+                                        <select class="form-control form-control-sm" id="newRoles" name="roleIds" multiple
+                                                style="height: 50px; width: 300px; margin: 0 auto">
+                                            <!-- Роли будут загружены динамически -->
+                                        </select>
+                                    </div>
+                                    <br>
+                                    <button type="button" class="btn btn-success" onclick="createUser()">Add new user</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Content -->
+            <div id="userContent" class="hidden">
+                <h1>User information-page</h1>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">About user</h3>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped" id="userInfoTable">
+                            <thead>
+                            <tr>
+                                <th class="hidden-column">Id</th>
+                                <th>Username</th>
+                                <th>Name</th>
+                                <th>Last Name</th>
+                                <th>Age</th>
+                                <th>Roles</th>
+                            </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для редактирования -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Edit user</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm" class="col-md text-center">
+                    <input type="hidden" id="editUserId">
+                    <div>
+                        <label for="editId"><b>Id</b></label>
+                        <input type="text" class="form-control" id="editId" disabled>
+                    </div>
+                    <br>
+                    <div>
+                        <label for="editName"><b>Name</b></label>
+                        <input type="text" class="form-control" id="editName" required>
+                    </div>
+                    <br>
+                    <div>
+                        <label for="editLastName"><b>Last Name</b></label>
+                        <input type="text" class="form-control" id="editLastName" required>
+                    </div>
+                    <br>
+                    <div>
+                        <label for="editAge"><b>Age</b></label>
+                        <input type="number" class="form-control" id="editAge" required>
+                    </div>
+                    <br>
+                    <div>
+                        <label for="editUsername"><b>Username</b></label>
+                        <input type="text" class="form-control" id="editUsername" required>
+                    </div>
+                    <br>
+                    <div>
+                        <label for="editPassword"><b>Password</b></label>
+                        <input type="password" class="form-control" id="editPassword">
+                    </div>
+                    <br>
+                    <div>
+                        <label><b>Roles</b></label>
+                        <select class="form-control form-control-sm" id="editRoles" name="roleIds" multiple
+                                style="height: 50px; width: 300px; margin: 0 auto">
+                            <!-- Роли будут загружены динамически -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveUserChanges()">Edit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для удаления -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete user</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="modal-body col-md text-center" id="deleteUserForm">
+                    <br>
+                    <label for="deleteId"><b>Id</b></label>
+                    <input type="text" class="form-control" id="deleteId" disabled/>
+                    <br>
+                    <label for="deleteUsername"><b>Username</b></label>
+                    <input type="text" class="form-control" id="deleteUsername" disabled/>
+                    <br>
+                    <label for="deleteName"><b>Name</b></label>
+                    <input type="text" class="form-control" id="deleteName" disabled/>
+                    <br>
+                    <label for="deleteLastName"><b>Last Name</b></label>
+                    <input type="text" class="form-control" id="deleteLastName" disabled/>
+                    <br>
+                    <label for="deleteAge"><b>Age</b></label>
+                    <input type="text" class="form-control" id="deleteAge" disabled/>
+                    <br>
+                    <label><b>Role</b></label>
+                    <select class="form-select" id="deleteRoles" aria-label="size 2 select example" disabled multiple>
+                        <!-- Роли будут добавлены через JS -->
+                    </select>
+                    <br><br>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let availableRoles = [];
+
+    function loadRoles() {
+        console.log("Fetching roles from /api/admin/roles");
+        fetch('/api/admin/roles', { credentials: 'include' })
+            .then(response => {
+                console.log("Roles response status: " + response.status);
+                if (!response.ok) throw new Error('Failed to fetch roles: ' + response.status);
+                return response.json();
+            })
+            .then(roles => {
+                console.log("Roles received: ", roles);
+                availableRoles = roles.map(role => ({
+                    id: role.id,
+                    authority: role.authority
+                }));
+                console.log("Mapped availableRoles: ", availableRoles);
+                const newRolesSelect = document.getElementById('newRoles');
+                const editRolesSelect = document.getElementById('editRoles');
+                newRolesSelect.innerHTML = '';
+                editRolesSelect.innerHTML = '';
+                availableRoles.forEach(role => {
+                    newRolesSelect.innerHTML += `<option value="${role.id}">${role.authority}</option>`;
+                    editRolesSelect.innerHTML += `<option value="${role.id}">${role.authority}</option>`;
+                });
+            })
+            .catch(error => console.error('Error loading roles:', error));
+    }
+
+    function loadUsers() {
+        fetch('/api/admin')
+            .then(response => response.json())
+            .then(users => {
+                const usersTable = document.getElementById('usersTable').getElementsByTagName('tbody')[0];
+                usersTable.innerHTML = '';
+                users.forEach(user => {
+                    const row = usersTable.insertRow();
+                    row.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.username}</td>
+                        <td>${user.name}</td>
+                        <td>${user.lastName}</td>
+                        <td>${user.age}</td>
+                        <td>${user.authorities.map(authority => authority.authority).join(', ') || 'No roles'}</td>
+                        <td><a style="padding: 10px; background-color: #3399FF; color: white; text-decoration: none; border-radius: 5px;" href="#" onclick="editUser(${user.id}); return false;">Edit</a></td>
+                        <td><a class="btn btn-danger" href="#" onclick="deleteUser(${user.id}); return false;">Delete</a></td>
+                    `;
+                });
+            })
+            .catch(error => console.error('Error loading users:', error));
+    }
+
+    function createUser() {
+        const selectedRoles = Array.from(document.getElementById('newRoles').selectedOptions).map(option => parseInt(option.value));
+        const newUser = {
+            name: document.getElementById('newName').value,
+            lastName: document.getElementById('newLastName').value,
+            age: document.getElementById('newAge').value,
+            username: document.getElementById('newUsername').value,
+            password: document.getElementById('newPassword').value
+        };
+
+        fetch(`/api/admin/save?roleIds=${selectedRoles.join(',')}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newUser)
+        })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('newUserForm').reset();
+                    loadUsers();
+                    document.getElementById('usersTable-tab').click();
+                } else {
+                    return response.json().then(errors => {
+                        if (Array.isArray(errors)) {
+                            alert("Ошибка:\n" + errors.join("\n"));
+                        } else {
+                            alert('Error creating user: ' + JSON.stringify(errors));
+                        }
+                        throw new Error('Validation failed');
+                    });
+                }
+            })
+            .catch(error => console.error('Error creating user:', error));
+    }
+
+    function editUser(userId) {
+        fetch(`/api/admin/${userId}`, { credentials: 'include' })
+            .then(response => {
+                if (!response.ok) throw new Error('User not found');
+                return response.json();
+            })
+            .then(user => {
+                document.getElementById('editUserId').value = user.id;
+                document.getElementById('editId').value = user.id;
+                document.getElementById('editName').value = user.name;
+                document.getElementById('editLastName').value = user.lastName;
+                document.getElementById('editAge').value = user.age;
+                document.getElementById('editUsername').value = user.username;
+                document.getElementById('editPassword').value = '';
+                const editRolesSelect = document.getElementById('editRoles');
+                const userRoleIds = user.authorities.map(a => availableRoles.find(r => r.authority === a.authority)?.id);
+                Array.from(editRolesSelect.options).forEach(option => {
+                    option.selected = userRoleIds.includes(parseInt(option.value));
+                });
+                const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+                modal.show();
+            })
+            .catch(error => console.error('Error loading user:', error));
+    }
+
+    function saveUserChanges() {
+        const userId = document.getElementById('editUserId').value;
+        const selectedRoles = Array.from(document.getElementById('editRoles').selectedOptions).map(option => parseInt(option.value));
+        const updatedUser = {
+            id: userId,
+            name: document.getElementById('editName').value,
+            lastName: document.getElementById('editLastName').value,
+            age: document.getElementById('editAge').value,
+            username: document.getElementById('editUsername').value,
+            password: document.getElementById('editPassword').value || undefined
+        };
+
+        fetch(`/api/admin/user/${userId}?roleIds=${selectedRoles.join(',')}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedUser)
+        })
+            .then(response => {
+                if (response.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+                    modal.hide();
+                    loadUsers();
+                } else {
+                    return response.json().then(errors => {
+                        if (Array.isArray(errors)) {
+                            alert("Ошибка:\n" + errors.join("\n"));
+                        } else {
+                            alert('Error updating user: ' + errors);
+                        }
+                        throw new Error('Validation failed');
+                    });
+                }
+            })
+            .catch(error => console.error('Error updating user:', error));
+    }
+
+    function deleteUser(userId) {
+        fetch(`/api/admin/${userId}`, { credentials: 'include' })
+            .then(response => {
+                if (!response.ok) throw new Error('User not found');
+                return response.json();
+            })
+            .then(user => {
+                document.getElementById('deleteId').value = user.id;
+                document.getElementById('deleteUsername').value = user.username;
+                document.getElementById('deleteName').value = user.name;
+                document.getElementById('deleteLastName').value = user.lastName;
+                document.getElementById('deleteAge').value = user.age;
+
+                const rolesSelect = document.getElementById('deleteRoles');
+                rolesSelect.innerHTML = '';
+                user.authorities.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role.id;
+                    option.text = role.authority;
+                    option.selected = true;
+                    rolesSelect.appendChild(option);
+                });
+
+                const modal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+                modal.show();
+
+                document.getElementById('confirmDeleteBtn').onclick = function() {
+                    fetch(`/api/admin/${userId}`, {
+                        method: 'DELETE'
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                modal.hide();
+                                loadUsers();
+                            } else {
+                                alert('Error deleting user');
+                            }
+                        })
+                        .catch(error => console.error('Error deleting user:', error));
+                };
+            })
+            .catch(error => console.error('Error loading user data:', error));
+    }
+
+    function loadUserInfo() {
+        console.log("Fetching current user info...");
+        fetch('/api/admin/user', { credentials: 'include' })
+            .then(response => {
+                console.log("Response status: " + response.status);
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.log("User not authenticated");
+                        document.getElementById('usernameDisplay').textContent = 'Username: Guest';
+                        document.getElementById('rolesDisplay').textContent = '';
+                        const userTable = document.getElementById('userInfoTable').getElementsByTagName('tbody')[0];
+                        userTable.innerHTML = '<tr><td class="hidden-column">-</td><td>Guest</td><td>-</td><td>-</td><td>-</td><td>No roles</td></tr>';
+                    } else {
+                        throw new Error('Error fetching user info: ' + response.status);
+                    }
+                } else {
+                    return response.json();
+                }
+            })
+            .then(user => {
+                console.log("Current user data: ", user);
+                if (user) {
+                    document.getElementById('usernameDisplay').textContent = `Username: ${user.username}`;
+                    document.getElementById('rolesDisplay').textContent = `with roles: ${user.authorities.map(a => a.authority).join(', ') || 'No roles'}`;
+                    const userTable = document.getElementById('userInfoTable').getElementsByTagName('tbody')[0];
+                    userTable.innerHTML = `
+                        <td class="hidden-column">${user.id || '-'}</td>
+                        <td>${user.username || '-'}</td>
+                        <td>${user.name || '-'}</td>
+                        <td>${user.lastName || '-'}</td>
+                        <td>${user.age || '-'}</td>
+                        <td>${user.authorities.map(a => a.authority).join(', ') || 'No roles'}</td>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading user info:', error);
+                document.getElementById('usernameDisplay').textContent = 'Username: Guest';
+                document.getElementById('rolesDisplay').textContent = '';
+                const userTable = document.getElementById('userInfoTable').getElementsByTagName('tbody')[0];
+                userTable.innerHTML = '<tr><td class="hidden-column">-</td><td>Guest</td><td>-</td><td>-</td><td>-</td><td>No roles</td></tr>';
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        loadUsers();
+        loadUserInfo();
+        loadRoles();
+
+        const adminButton = document.getElementById("adminButton");
+        const userButton = document.getElementById("userButton");
+        const adminContent = document.getElementById("adminContent");
+        const userContent = document.getElementById("userContent");
+
+        adminButton.addEventListener("click", function () {
+            adminContent.classList.remove("hidden");
+            userContent.classList.add("hidden");
+            adminButton.classList.add("btn-primary");
+            adminButton.classList.remove("btn-link");
+            userButton.classList.remove("btn-primary");
+            userButton.classList.add("btn-link");
+        });
+
+        userButton.addEventListener("click", function () {
+            adminContent.classList.add("hidden");
+            userContent.classList.remove("hidden");
+            userButton.classList.add("btn-primary");
+            userButton.classList.remove("btn-link");
+            adminButton.classList.remove("btn-primary");
+            adminButton.classList.add("btn-link");
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+</body>
+</html>
