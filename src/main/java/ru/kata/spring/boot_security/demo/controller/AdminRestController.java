@@ -64,7 +64,8 @@ public class AdminRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteUser(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        System.out.println("Deleting user ID: " + id + " by user: " + user.getUsername() + " with roles: " + user.getAuthorities());
         userService.deleteUser(id);
         return ResponseEntity.ok("User deleted successfully!");
     }
